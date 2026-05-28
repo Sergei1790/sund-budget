@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  createdAt DateTime @default(now())
+
+  households HouseholdMember[]
+}
+
+
+model Household {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+
+  members    HouseholdMember[]
+  categories Category[]
+  spendings  Spending[]
+}
+
+model HouseholdMember {
+  id          Int       @id @default(autoincrement())
+  householdId Int
+  userId      String
+  joinedAt    DateTime  @default(now())
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([householdId, userId])
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String
+  icon        String?
+  householdId Int
+
+  household Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  spendings Spending[]
+}
+
+model Spending {
+  id          Int      @id @default(autoincrement())
+  amount      Decimal  @db.Decimal(10, 2)
+  description String?
+  date        DateTime
+  categoryId  Int
+  householdId Int
+  createdAt   DateTime @default(now())
+
+  category  Category  @relation(fields: [categoryId], references: [id])
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@index([householdId, date])
+}
+
