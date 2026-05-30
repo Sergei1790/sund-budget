@@ -1,8 +1,6 @@
+import type {Household, Category} from '@/generated/prisma/client';
 interface Props {
-    household: {
-        name: string;
-        categories: {id: number,name: string, icon?: string,}[]
-    }
+  household: Household & {categories: Category[]};
 }
 
 export default function Dashboard({household}: Props){ 
