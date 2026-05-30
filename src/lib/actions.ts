@@ -5,6 +5,7 @@ import {auth} from '@/auth';
 import {revalidatePath} from 'next/cache';
 
 export async function createHousehold(formData: FormData) {
+    const DEFAULT_CATEGORIES = ['Groceries', 'Household Supplies', 'Bills', 'Clothes', 'Presents', 'Entertainment', 'Other'];
     try {
         const name = formData.get('name') as string;
         if (!name?.trim()) throw new Error('Name required');
@@ -30,6 +31,12 @@ export async function createHousehold(formData: FormData) {
             });
             await prisma.householdMember.create({
                 data: {householdId: newHousehold.id, userId: user.id},
+            });
+            await prisma.category.createMany({
+                data: DEFAULT_CATEGORIES.map((cat) => ({
+                    name: cat,
+                    householdId: newHousehold.id
+                })),
             });
         }
 
