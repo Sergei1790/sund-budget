@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npm run build
+        env:
+          AUTH_SECRET: dummy-secret-for-build
+          AUTH_GITHUB_ID: dummy
+          AUTH_GITHUB_SECRET: dummy
+          AUTH_GOOGLE_ID: dummy
+          AUTH_GOOGLE_SECRET: dummy
+          DATABASE_URL: postgresql://user:pass@localhost:5432/db
