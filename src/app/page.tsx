@@ -1,4 +1,5 @@
 import CreateHouseholdForm from '@/components/CreateHouseholdForm';
+import AddCategoryForm from '@/components/AddCategoryForm';
 import Dashboard from '@/components/Dashboard';
 import {prisma} from '@/lib/prisma';
 import {auth} from '@/auth';
@@ -25,13 +26,14 @@ export default async function Home() {
         return <p>User not found</p>;
     }
     const household = dbUser.households[0]?.household;
-    
+
     return (
         <main className="p-6">
             <h1 className="text-2xl font-bold mb-4">Sund Budget</h1>
-            {dbUser.households.length > 0 
+            {household
                 ? <div>
-                    <p>Dashboard</p> <Dashboard household={household} />
+                    <Dashboard household={household} />
+                    <AddCategoryForm />
                 </div>
                 : <CreateHouseholdForm />
             }

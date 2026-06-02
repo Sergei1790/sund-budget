@@ -46,3 +46,29 @@ export async function createHousehold(formData: FormData) {
         throw err;
     }
 }
+
+export async function createCategory(formData: FormData){
+    try {
+        const name = formData.get('name') as string;
+        if (!name?.trim()) throw new Error('Name required');
+
+        const session = await auth();
+        if (!session?.user?.email) throw new Error('Not authenticated');
+
+        const user = await prisma.user.findUnique({
+            where: {email: session.user.email},
+            include: {households: true},
+        });
+        if (!user) throw new Error('Not authenticated');
+
+        if(!user.households[0]) throw new Error('No household membership exists');
+        await prisma.category.create({
+            data: {name, householdId: user.households[0].householdId},
+        });
+        
+        revalidatePath('/');
+    } catch (err) {
+        console.error('createCategory failed:', err);
+        throw err;
+    }
+}
