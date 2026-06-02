@@ -35,7 +35,7 @@ export async function createHousehold(formData: FormData) {
             await prisma.category.createMany({
                 data: DEFAULT_CATEGORIES.map((cat) => ({
                     name: cat,
-                    householdId: newHousehold.id
+                    householdId: newHousehold.id,
                 })),
             });
         }
@@ -47,7 +47,7 @@ export async function createHousehold(formData: FormData) {
     }
 }
 
-export async function createCategory(formData: FormData){
+export async function createCategory(formData: FormData) {
     try {
         const name = formData.get('name') as string;
         if (!name?.trim()) throw new Error('Name required');
@@ -60,15 +60,62 @@ export async function createCategory(formData: FormData){
             include: {households: true},
         });
         if (!user) throw new Error('Not authenticated');
+        if (!user.households[0]) throw new Error('No household membership exists');
 
-        if(!user.households[0]) throw new Error('No household membership exists');
         await prisma.category.create({
             data: {name, householdId: user.households[0].householdId},
         });
-        
+
         revalidatePath('/');
     } catch (err) {
         console.error('createCategory failed:', err);
+        throw err;
+    }
+}
+
+export async function createSpending(formData: FormData) {
+    try {
+        const amount = formData.get('amount') as string;
+        const description = formData.get('description') as string;
+        const rawDate = formData.get('date') as string;
+        const date = new Date(rawDate);
+        const categoryId = Number(formData.get('categoryId'));
+
+        if (!amount?.trim()) throw new Error('Amount required');
+        if (isNaN(date.getTime())) throw new Error('Date required');
+        if (!categoryId || isNaN(categoryId)) throw new Error('Category required');
+
+        const session = await auth();
+        if (!session?.user?.email) throw new Error('Not authenticated');
+
+        const user = await prisma.user.findUnique({
+            where: {email: session.user.email},
+            include: {
+                households: {
+                    include: {
+                        household: {
+                            include: {
+                                categories: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        if (!user) throw new Error('Not authenticated');
+
+        if (!user.households[0]) throw new Error('No household membership exists');
+
+        const householdCategories = user.households[0].household.categories;
+        if (!householdCategories.some((c) => c.id === categoryId)) throw new Error('Category not in your household');
+
+        await prisma.spending.create({
+            data: {amount, description, date, categoryId, householdId: user.households[0].householdId},
+        });
+
+        revalidatePath('/');
+    } catch (err) {
+        console.error('createSpending failed:', err);
         throw err;
     }
 }
