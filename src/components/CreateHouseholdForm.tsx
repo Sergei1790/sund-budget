@@ -5,14 +5,20 @@ import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 
-export default function CreateHouseholdForm(){ 
-    return(
-        <form action={createHousehold} className="space-y-3 max-w-sm">
-            <div>
-                <Label htmlFor="name">Household name</Label>
-                <Input id="name" name="name" placeholder="My Family" required />
-            </div>
-            <Button type="submit">Create household</Button>
-        </form>
+export default function CreateHouseholdForm() {
+    return (
+        <div className="max-w-md mx-auto p-6">
+            <h2 className="text-2xl font-bold mb-4">Create your household</h2>
+            <p className="text-muted-foreground mb-6">Start tracking spending with your partner.</p>
+            <form action={createHousehold} className="space-y-3">
+                <div className="space-y-1.5">
+                    <Label htmlFor="name">Household name</Label>
+                    <Input id="name" name="name" placeholder="My Family" required />
+                </div>
+                <Button type="submit" className="w-full">
+                    Create household
+                </Button>
+            </form>
+        </div>
     );
 }
