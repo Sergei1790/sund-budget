@@ -2,7 +2,8 @@ import type {Household, Category, Spending} from '@/generated/prisma/client';
 import AddCategoryForm from '@/components/AddCategoryForm';
 import AddSpendingForm from '@/components/AddSpendingForm';
 import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
-
+import formatCurrency from '@/lib/format';
+import {startOfMonth, startOfWeek, isAfter} from 'date-fns';
 interface Props {
     household: Household & {
         categories: Category[];
@@ -11,10 +12,27 @@ interface Props {
 }
 
 export default function Dashboard({household}: Props) {
+    const weekStart = startOfWeek(new Date(), {weekStartsOn: 1});
+    const weekSpendings = household.spendings.filter((s) => isAfter(s.date, weekStart));
+    const weekTotal = weekSpendings.reduce((acc, s) => acc + s.amount.toNumber(), 0);
+
+    const monthStart = startOfMonth(new Date());
+    const monthSpendings = household.spendings.filter((s) => isAfter(s.date, monthStart));
+    const monthTotal = monthSpendings.reduce((acc, s) => acc + s.amount.toNumber(), 0);
     return (
         <div className="max-w-4xl mx-auto p-6 space-y-6">
-            <header>
+            <header className="space-y-4">
                 <h2 className="text-3xl font-bold">{household.name}</h2>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                        <span className="text-sm text-muted-foreground">This week</span>
+                        <span className="text-3xl font-bold">{formatCurrency(weekTotal)}</span>
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-sm text-muted-foreground">This month</span>
+                        <span className="text-3xl font-bold">{formatCurrency(monthTotal)}</span>
+                    </div>
+                </div>
             </header>
 
             <Card>
@@ -39,17 +57,11 @@ export default function Dashboard({household}: Props) {
                                 <li key={spending.id} className="flex items-center justify-between py-3 gap-4">
                                     <div className="flex flex-col min-w-0">
                                         <span className="font-medium truncate">{spending.category.name}</span>
-                                        {spending.description && (
-                                            <span className="text-sm text-muted-foreground truncate">
-                                                {spending.description}
-                                            </span>
-                                        )}
+                                        {spending.description && <span className="text-sm text-muted-foreground truncate">{spending.description}</span>}
                                     </div>
                                     <div className="flex flex-col items-end shrink-0">
-                                        <span className="font-mono font-semibold">{spending.amount.toString()}</span>
-                                        <span className="text-xs text-muted-foreground">
-                                            {spending.date.toLocaleDateString()}
-                                        </span>
+                                        <span className="font-mono font-semibold">{formatCurrency(spending.amount.toNumber())}</span>
+                                        <span className="text-xs text-muted-foreground">{spending.date.toLocaleDateString()}</span>
                                     </div>
                                 </li>
                             ))}
@@ -65,10 +77,7 @@ export default function Dashboard({household}: Props) {
                 <CardContent className="space-y-4">
                     <div className="flex flex-wrap gap-2">
                         {household.categories.map((cat) => (
-                            <span
-                                key={cat.id}
-                                className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground"
-                            >
+                            <span key={cat.id} className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground">
                                 {cat.name}
                             </span>
                         ))}
