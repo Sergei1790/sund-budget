@@ -119,3 +119,84 @@ export async function createSpending(formData: FormData) {
         throw err;
     }
 }
+
+export async function updateSpending(formData: FormData) {
+    try {
+        const spendingId = Number(formData.get('spendingId'));
+        const amount = formData.get('amount') as string;
+        const description = formData.get('description') as string;
+        const rawDate = formData.get('date') as string;
+        const date = new Date(rawDate);
+        const categoryId = Number(formData.get('categoryId'));
+
+        if (!spendingId || isNaN(spendingId)) throw new Error('No id sent');
+        if (!amount?.trim()) throw new Error('Amount required');
+        if (isNaN(date.getTime())) throw new Error('Date required');
+        if (!categoryId || isNaN(categoryId)) throw new Error('Category required');
+
+        const session = await auth();
+        if (!session?.user?.email) throw new Error('Not authenticated');
+
+        const user = await prisma.user.findUnique({
+            where: {email: session.user.email},
+            include: {households: true},
+        });
+
+        if (!user) throw new Error('Not authenticated');
+        
+        if (!user.households[0]) throw new Error('No household membership exists');
+        
+        
+        const category = await prisma.category.findUnique({where: {id: categoryId}});
+        if (!category) throw new Error('No category');
+        if (category.householdId !== user.households[0].householdId) throw new Error('Category not in your household');
+
+        const spending = await prisma.spending.findUnique({where: {id: spendingId}});
+        if (!spending) throw new Error('No spending');
+        if (spending.householdId !== user.households[0].householdId) throw new Error('Spending not in your household');
+        
+        await prisma.spending.update({
+            where: {id:spendingId},        
+            data: { 
+                amount,
+                description,
+                date,
+                categoryId
+            }
+        });
+        revalidatePath('/');
+    } catch (err) {
+        console.error('updateSpending failed:', err);
+        throw err;
+    }
+}
+
+export async function deleteSpending(formData: FormData) {
+    try {
+        const spendingId = Number(formData.get('spendingId'));
+        if (!spendingId || isNaN(spendingId)) throw new Error('No id sent');
+
+        const session = await auth();
+        if (!session?.user?.email) throw new Error('Not authenticated');
+
+        const user = await prisma.user.findUnique({
+            where: {email: session.user.email},
+            include: {households: true},
+        });
+
+        if (!user) throw new Error('Not authenticated');
+        if (!user.households[0]) throw new Error('No household membership exists');
+        
+        const spending = await prisma.spending.findUnique({where: {id: spendingId}});
+        if (!spending) throw new Error('No spending');
+
+        if (spending.householdId !== user.households[0].householdId) throw new Error('Spending not in your household');
+
+        await prisma.spending.delete({ where: { id:spendingId } });
+
+        revalidatePath('/');
+    } catch (err) {
+        console.error('deleteSpending failed:', err);
+        throw err;
+    }
+}
