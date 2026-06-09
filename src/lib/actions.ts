@@ -73,6 +73,71 @@ export async function createCategory(formData: FormData) {
     }
 }
 
+export async function updateCategory(formData: FormData) {
+    try {
+        const categoryId = Number(formData.get('categoryId'));
+        const name = formData.get('name') as string;
+        if (!name?.trim()) throw new Error('Name required');
+        if (!categoryId || isNaN(categoryId)) throw new Error('Category required');
+
+        const session = await auth();
+        if (!session?.user?.email) throw new Error('Not authenticated');
+
+        const user = await prisma.user.findUnique({
+            where: {email: session.user.email},
+            include: {households: true},
+        });
+
+        if (!user) throw new Error('Not authenticated');
+        
+        if (!user.households[0]) throw new Error('No household membership exists');
+        
+        
+        const category = await prisma.category.findUnique({where: {id: categoryId}});
+        if (!category) throw new Error('No category');
+        if (category.householdId !== user.households[0].householdId) throw new Error('Category not in your household');
+
+        await prisma.category.update({
+            where: {id:categoryId},        
+            data: {name}
+        });
+        revalidatePath('/');
+    } catch (err) {
+        console.error('updateCategory failed:', err);
+        throw err;
+    }
+}
+
+export async function deleteCategory(formData: FormData) {
+    try {
+        const categoryId = Number(formData.get('categoryId'));
+        if (!categoryId || isNaN(categoryId)) throw new Error('No id sent');
+
+        const session = await auth();
+        if (!session?.user?.email) throw new Error('Not authenticated');
+
+        const user = await prisma.user.findUnique({
+            where: {email: session.user.email},
+            include: {households: true},
+        });
+
+        if (!user) throw new Error('Not authenticated');
+        if (!user.households[0]) throw new Error('No household membership exists');
+        
+        const category = await prisma.category.findUnique({where: {id: categoryId}});
+        if (!category) throw new Error('No category');
+
+        if (category.householdId !== user.households[0].householdId) throw new Error('Category not in your household');
+
+        await prisma.category.delete({ where: { id:categoryId } });
+
+        revalidatePath('/');
+    } catch (err) {
+        console.error('deleteCategory failed:', err);
+        throw err;
+    }
+}
+
 export async function createSpending(formData: FormData) {
     try {
         const amount = formData.get('amount') as string;

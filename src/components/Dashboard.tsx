@@ -1,6 +1,8 @@
 import type {Household, Category, Spending} from '@/generated/prisma/client';
 import AddCategoryForm from '@/components/AddCategoryForm';
 import AddSpendingForm from '@/components/AddSpendingForm';
+import SpendingRow from '@/components/SpendingRow';
+import CategoryItem from '@/components/CategoryItem';
 import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import formatCurrency from '@/lib/format';
 import {startOfMonth, startOfWeek, isAfter} from 'date-fns';
@@ -54,16 +56,7 @@ export default function Dashboard({household}: Props) {
                     ) : (
                         <ul className="divide-y divide-border">
                             {household.spendings.map((spending) => (
-                                <li key={spending.id} className="flex items-center justify-between py-3 gap-4">
-                                    <div className="flex flex-col min-w-0">
-                                        <span className="font-medium truncate">{spending.category.name}</span>
-                                        {spending.description && <span className="text-sm text-muted-foreground truncate">{spending.description}</span>}
-                                    </div>
-                                    <div className="flex flex-col items-end shrink-0">
-                                        <span className="font-mono font-semibold">{formatCurrency(spending.amount.toNumber())}</span>
-                                        <span className="text-xs text-muted-foreground">{spending.date.toLocaleDateString()}</span>
-                                    </div>
-                                </li>
+                                <SpendingRow key={spending.id} spending={{...spending, amount: spending.amount.toNumber()}} categories={household.categories} />
                             ))}
                         </ul>
                     )}
@@ -77,9 +70,7 @@ export default function Dashboard({household}: Props) {
                 <CardContent className="space-y-4">
                     <div className="flex flex-wrap gap-2">
                         {household.categories.map((cat) => (
-                            <span key={cat.id} className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground">
-                                {cat.name}
-                            </span>
+                            <CategoryItem key={cat.id} category={cat} />
                         ))}
                     </div>
                     <AddCategoryForm />

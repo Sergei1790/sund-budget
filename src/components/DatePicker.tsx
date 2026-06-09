@@ -8,8 +8,9 @@ import {Calendar} from '@/components/ui/calendar';
 import {format} from 'date-fns';
 import {CalendarIcon} from 'lucide-react';
 
-export default function DatePicker({ name }: { name: string }){
-    const [date, setDate] = useState<Date>(new Date());
+export default function DatePicker({ name, defaultDate }: { name: string, defaultDate?: Date | string }){
+    const [date, setDate] = useState<Date>(defaultDate ? new Date(defaultDate) : new Date());
+
     return(
         <>
             <Popover>
