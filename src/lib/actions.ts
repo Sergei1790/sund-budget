@@ -3,6 +3,7 @@
 import {prisma} from '@/lib/prisma';
 import {auth} from '@/auth';
 import {revalidatePath} from 'next/cache';
+import {redirect} from 'next/navigation';
 
 export async function createHousehold(formData: FormData) {
     const DEFAULT_CATEGORIES = ['Groceries', 'Household Supplies', 'Bills', 'Clothes', 'Presents', 'Entertainment', 'Other'];
@@ -89,17 +90,16 @@ export async function updateCategory(formData: FormData) {
         });
 
         if (!user) throw new Error('Not authenticated');
-        
+
         if (!user.households[0]) throw new Error('No household membership exists');
-        
-        
+
         const category = await prisma.category.findUnique({where: {id: categoryId}});
         if (!category) throw new Error('No category');
         if (category.householdId !== user.households[0].householdId) throw new Error('Category not in your household');
 
         await prisma.category.update({
-            where: {id:categoryId},        
-            data: {name}
+            where: {id: categoryId},
+            data: {name},
         });
         revalidatePath('/');
     } catch (err) {
@@ -123,13 +123,13 @@ export async function deleteCategory(formData: FormData) {
 
         if (!user) throw new Error('Not authenticated');
         if (!user.households[0]) throw new Error('No household membership exists');
-        
+
         const category = await prisma.category.findUnique({where: {id: categoryId}});
         if (!category) throw new Error('No category');
 
         if (category.householdId !== user.households[0].householdId) throw new Error('Category not in your household');
 
-        await prisma.category.delete({ where: { id:categoryId } });
+        await prisma.category.delete({where: {id: categoryId}});
 
         revalidatePath('/');
     } catch (err) {
@@ -208,10 +208,9 @@ export async function updateSpending(formData: FormData) {
         });
 
         if (!user) throw new Error('Not authenticated');
-        
+
         if (!user.households[0]) throw new Error('No household membership exists');
-        
-        
+
         const category = await prisma.category.findUnique({where: {id: categoryId}});
         if (!category) throw new Error('No category');
         if (category.householdId !== user.households[0].householdId) throw new Error('Category not in your household');
@@ -219,15 +218,15 @@ export async function updateSpending(formData: FormData) {
         const spending = await prisma.spending.findUnique({where: {id: spendingId}});
         if (!spending) throw new Error('No spending');
         if (spending.householdId !== user.households[0].householdId) throw new Error('Spending not in your household');
-        
+
         await prisma.spending.update({
-            where: {id:spendingId},        
-            data: { 
+            where: {id: spendingId},
+            data: {
                 amount,
                 description,
                 date,
-                categoryId
-            }
+                categoryId,
+            },
         });
         revalidatePath('/');
     } catch (err) {
@@ -251,17 +250,50 @@ export async function deleteSpending(formData: FormData) {
 
         if (!user) throw new Error('Not authenticated');
         if (!user.households[0]) throw new Error('No household membership exists');
-        
+
         const spending = await prisma.spending.findUnique({where: {id: spendingId}});
         if (!spending) throw new Error('No spending');
 
         if (spending.householdId !== user.households[0].householdId) throw new Error('Spending not in your household');
 
-        await prisma.spending.delete({ where: { id:spendingId } });
+        await prisma.spending.delete({where: {id: spendingId}});
 
         revalidatePath('/');
     } catch (err) {
         console.error('deleteSpending failed:', err);
         throw err;
     }
+}
+
+export async function joinHousehold(formData: FormData) {
+    try {
+        const inviteToken = formData.get('inviteToken') as string;
+        if (!inviteToken) throw new Error('No inviteToken sent');
+
+        const session = await auth();
+        if (!session?.user?.email) throw new Error('Not authenticated');
+
+        const user = await prisma.user.findUnique({
+            where: {email: session.user.email},
+            include: {households: true},
+        });
+
+        if (!user) throw new Error('Not authenticated');
+
+        if (user.households.length > 0) {
+            throw new Error('You are already in a household');
+        } else {
+            const household = await prisma.household.findUnique({where: {inviteToken}});
+            if (!household) throw new Error('Invalid invite');
+            await prisma.householdMember.create({
+                data: {householdId: household.id, userId: user.id},
+            });
+        }
+
+        revalidatePath('/');
+    } catch (err) {
+        console.error('joinHousehold failed:', err);
+        throw err;
+    }
+     redirect('/');
 }

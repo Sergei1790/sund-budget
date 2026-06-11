@@ -31,6 +31,7 @@ model Household {
   members    HouseholdMember[]
   categories Category[]
   spendings  Spending[]
+  inviteToken String @unique @default(cuid())
 }
 
 model HouseholdMember {
