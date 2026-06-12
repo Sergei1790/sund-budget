@@ -6,10 +6,11 @@ import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/compo
 import {redirect} from 'next/navigation';
 
 export default async function JoinHousehold({params}: {params: Promise<{token: string}>}) {
-    const session = await auth();
-    if (!session?.user?.email) redirect('/signin');
     const {token} = await params;
     const household = await prisma.household.findUnique({where: {inviteToken: token}});
+    const session = await auth();
+    if (!session?.user?.email) redirect(`/signin?callbackUrl=/join/${token}`);
+
     if (!household) {
         return <main>No Household</main>;
     }

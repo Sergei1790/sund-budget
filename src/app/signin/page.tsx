@@ -2,7 +2,8 @@ import {signIn} from '@/auth';
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
 
-export default function SignInPage() {
+export default async function SignInPage({searchParams}: {searchParams: Promise<{callbackUrl?: string}>}) {
+    const {callbackUrl} = await searchParams;
     return (
         <main className="min-h-screen flex items-center justify-center p-4">
             <Card className="w-full max-w-sm">
@@ -11,10 +12,10 @@ export default function SignInPage() {
                     <CardDescription>Sign in to continue</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    <form action={async () => { 'use server'; await signIn('google', {redirectTo: '/'}); }}>
+                    <form action={async () => { 'use server'; await signIn('google', {redirectTo: callbackUrl ?? '/'}); }}>
                         <Button type="submit" className="w-full">Sign in with Google</Button>
                     </form>
-                    <form action={async () => { 'use server'; await signIn('github', {redirectTo: '/'}); }}>
+                    <form action={async () => { 'use server'; await signIn('github', {redirectTo: callbackUrl ?? '/'}); }}>
                         <Button type="submit" className="w-full">Sign in with GitHub</Button>
                     </form>
                 </CardContent>

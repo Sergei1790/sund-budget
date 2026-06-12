@@ -32,7 +32,6 @@ export default async function Home() {
 
     return (
         <main className="p-6">
-            <h1 className="text-2xl font-bold mb-4">Sund Budget</h1>
             {household ? (
                 <div>
                     <Dashboard household={household} />
