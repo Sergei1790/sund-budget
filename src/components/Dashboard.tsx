@@ -6,6 +6,7 @@ import CategoryItem from '@/components/CategoryItem';
 import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import formatCurrency from '@/lib/format';
 import {startOfMonth, startOfWeek, isAfter} from 'date-fns';
+import SpendingChart from './SpendingChart';
 interface Props {
     household: Household & {
         categories: Category[];
@@ -21,6 +22,16 @@ export default function Dashboard({household}: Props) {
     const monthStart = startOfMonth(new Date());
     const monthSpendings = household.spendings.filter((s) => isAfter(s.date, monthStart));
     const monthTotal = monthSpendings.reduce((acc, s) => acc + s.amount.toNumber(), 0);
+
+    const totals = new Map<string, number>();
+
+    for (const s of monthSpendings) {
+        const current = totals.get(s.category.name) ?? 0;   
+        totals.set(s.category.name, current + Number(s.amount));
+    }
+    const chartData = Array.from(totals, ([name, total]) => ({name, total}));
+
+
     return (
         <div className="max-w-4xl mx-auto p-6 space-y-6">
             <header className="space-y-4">
@@ -62,7 +73,15 @@ export default function Dashboard({household}: Props) {
                     )}
                 </CardContent>
             </Card>
-
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle>Spending by category (this month)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {chartData.length > 0 ? <SpendingChart data={chartData} /> : <p>No data yet</p>}
+                </CardContent>
+            </Card>
             <Card>
                 <CardHeader>
                     <CardTitle>Categories</CardTitle>
@@ -76,6 +95,7 @@ export default function Dashboard({household}: Props) {
                     <AddCategoryForm />
                 </CardContent>
             </Card>
+
         </div>
     );
 }
