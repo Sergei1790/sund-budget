@@ -15,7 +15,7 @@ export default async function JoinHousehold({params}: {params: Promise<{token: s
         return <main>No Household</main>;
     }
     return (
-        <main className="min-h-screen flex items-center justify-center p-4">
+        <main className="flex-1 flex items-center justify-center p-4">
             <Card className="w-full max-w-sm">
                 <CardHeader className="text-center">
                     <CardTitle className="text-2xl">Sund Budget</CardTitle>

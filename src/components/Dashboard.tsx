@@ -33,17 +33,17 @@ export default function Dashboard({household}: Props) {
 
 
     return (
-        <div className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="max-w-4xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
             <header className="space-y-4">
                 <h2 className="text-3xl font-bold">{household.name}</h2>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col">
                         <span className="text-sm text-muted-foreground">This week</span>
-                        <span className="text-3xl font-bold">{formatCurrency(weekTotal)}</span>
+                        <span className="text-2xl sm:text-3xl font-bold">{formatCurrency(weekTotal)}</span>
                     </div>
                     <div className="flex flex-col">
                         <span className="text-sm text-muted-foreground">This month</span>
-                        <span className="text-3xl font-bold">{formatCurrency(monthTotal)}</span>
+                        <span className="text-2xl sm:text-3xl font-bold">{formatCurrency(monthTotal)}</span>
                     </div>
                 </div>
             </header>

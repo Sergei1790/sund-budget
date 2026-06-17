@@ -5,7 +5,7 @@ import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/compo
 export default async function SignInPage({searchParams}: {searchParams: Promise<{callbackUrl?: string}>}) {
     const {callbackUrl} = await searchParams;
     return (
-        <main className="min-h-screen flex items-center justify-center p-4">
+        <main className="flex-1 flex items-center justify-center p-4">
             <Card className="w-full max-w-sm">
                 <CardHeader className="text-center">
                     <CardTitle className="text-2xl">Sund Budget</CardTitle>
