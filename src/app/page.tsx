@@ -31,7 +31,7 @@ export default async function Home() {
     const household = dbUser.households[0]?.household;
 
     return (
-        <main className="p-6">
+        <main className="pt-4 sm:p-6">
             {household ? (
                 <div>
                     <Dashboard household={household} />

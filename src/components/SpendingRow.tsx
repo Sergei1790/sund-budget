@@ -7,6 +7,7 @@ import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import DatePicker from '@/components/DatePicker';
 import formatCurrency from '@/lib/format';
+import {Pencil, Trash2} from 'lucide-react';
 
 interface Props {
     spending: Omit<Spending, 'amount'> & {amount: number; category: Category};
@@ -19,13 +20,14 @@ export default function SpendingRow({spending, categories}: Props) {
     if (editing) {
         return (
             <li className="py-4">
-                <form action={async (formData) => {
+                <form
+                    action={async (formData) => {
                         await updateSpending(formData);
                         setEditing(false);
                     }}
                     className="space-y-4 rounded-lg border border-border bg-card/50 p-4">
                     <input type="hidden" name="spendingId" value={spending.id} />
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="space-y-1.5">
                             <Label htmlFor={`amount-${spending.id}`}>Amount</Label>
                             <Input id={`amount-${spending.id}`} name="amount" type="number" step="0.01" defaultValue={spending.amount} required />
@@ -74,12 +76,15 @@ export default function SpendingRow({spending, categories}: Props) {
             </div>
             <div className="flex gap-2 shrink-0">
                 <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
-                    Edit
+                    <Pencil className="h-4 w-4" />
+                    <span className="hidden sm:inline">Edit</span>
                 </Button>
+
                 <form action={deleteSpending}>
                     <input type="hidden" name="spendingId" value={spending.id} />
                     <Button type="submit" variant="destructive" size="sm">
-                        Delete
+                        <Trash2 className="h-4 w-4" />
+                        <span className="hidden sm:inline">Delete</span>
                     </Button>
                 </form>
             </div>
