@@ -7,6 +7,9 @@ import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import formatCurrency from '@/lib/format';
 import {startOfMonth, startOfWeek, isAfter} from 'date-fns';
 import SpendingChart from './SpendingChart';
+import Link from 'next/link';
+import {ScrollText} from 'lucide-react';
+
 interface Props {
     household: Household & {
         categories: Category[];
@@ -26,15 +29,18 @@ export default function Dashboard({household}: Props) {
     const totals = new Map<string, number>();
 
     for (const s of monthSpendings) {
-        const current = totals.get(s.category.name) ?? 0;   
+        const current = totals.get(s.category.name) ?? 0;
         totals.set(s.category.name, current + Number(s.amount));
     }
     const chartData = Array.from(totals, ([name, total]) => ({name, total}));
 
-
     return (
         <div className="max-w-4xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
             <header className="space-y-4">
+                <Link href="/history" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <ScrollText className="h-4 w-4" />
+                    History
+                </Link>{' '}
                 <h2 className="text-3xl font-bold">{household.name}</h2>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col">
@@ -73,14 +79,12 @@ export default function Dashboard({household}: Props) {
                     )}
                 </CardContent>
             </Card>
-            
+
             <Card>
                 <CardHeader>
                     <CardTitle>Spending by category (this month)</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    {chartData.length > 0 ? <SpendingChart data={chartData} /> : <p>No data yet</p>}
-                </CardContent>
+                <CardContent>{chartData.length > 0 ? <SpendingChart data={chartData} /> : <p>No data yet</p>}</CardContent>
             </Card>
             <Card>
                 <CardHeader>
@@ -95,7 +99,6 @@ export default function Dashboard({household}: Props) {
                     <AddCategoryForm />
                 </CardContent>
             </Card>
-
         </div>
     );
 }

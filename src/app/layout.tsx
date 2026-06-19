@@ -6,6 +6,7 @@ import { signOut } from '@/auth';
 import InviteLink from "@/components/InviteLink";
 import {prisma} from '@/lib/prisma'
 import Image from 'next/image';
+import Link from 'next/link';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,7 +40,7 @@ export default async function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}>
       <body className="min-h-full flex flex-col">
         <header className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-border">
-          <h1 className="text-xl sm:text-2xl font-bold">Sund Budget</h1>
+          <Link href="/"><h1 className="text-xl sm:text-2xl font-bold">Sund Budget</h1></Link>
           <div className="flex items-center gap-2">
             {household && (
               <InviteLink inviteToken={household.inviteToken} />
