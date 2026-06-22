@@ -8,6 +8,7 @@ import {Label} from '@/components/ui/label';
 import DatePicker from '@/components/DatePicker';
 import formatCurrency from '@/lib/format';
 import {Pencil, Trash2} from 'lucide-react';
+import {toast} from 'sonner';
 
 interface Props {
     spending: Omit<Spending, 'amount'> & {amount: number; category: Category};
@@ -23,6 +24,7 @@ export default function SpendingRow({spending, categories}: Props) {
                 <form
                     action={async (formData) => {
                         await updateSpending(formData);
+                        toast.success('Spending Updated');
                         setEditing(false);
                     }}
                     className="space-y-4 rounded-lg border border-border bg-card/50 p-4">
@@ -54,7 +56,13 @@ export default function SpendingRow({spending, categories}: Props) {
                         <Input id={`description-${spending.id}`} name="description" placeholder="What was it for?" defaultValue={spending.description ?? ''} />
                     </div>
                     <div className="flex gap-2 justify-end">
-                        <Button type="button" variant="outline" onClick={() => setEditing(false)}>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setEditing(false);
+                                toast.warning('Spending Update Cancelled');
+                            }}>
                             Cancel
                         </Button>
                         <Button type="submit">Update</Button>
@@ -80,7 +88,11 @@ export default function SpendingRow({spending, categories}: Props) {
                     <span className="hidden sm:inline">Edit</span>
                 </Button>
 
-                <form action={deleteSpending}>
+                <form
+                    action={async (formData) => {
+                        await deleteSpending(formData);
+                        toast.success('Spending deleted');
+                    }}>
                     <input type="hidden" name="spendingId" value={spending.id} />
                     <Button type="submit" variant="destructive" size="sm">
                         <Trash2 className="h-4 w-4" />

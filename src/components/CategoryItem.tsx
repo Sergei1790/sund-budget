@@ -5,6 +5,8 @@ import {updateCategory, deleteCategory} from '@/lib/actions';
 import {Button} from '@/components/ui/button';
 import {Pencil} from 'lucide-react';
 import {Input} from '@/components/ui/input';
+import {toast} from 'sonner';
+
 interface Props {
     category: Category;
 }
@@ -17,6 +19,7 @@ export default function CategoryItem({category}: Props) {
                 <form
                     action={async (formData) => {
                         await updateCategory(formData);
+                        toast.success('Category Updated');
                         setEditing(false);
                     }}
                     className="inline-flex items-center gap-2">
@@ -25,12 +28,19 @@ export default function CategoryItem({category}: Props) {
                     <Button type="submit" size="sm" className="h-7 rounded-full">
                         Update
                     </Button>
-                    <Button type="button" size="sm" variant="outline" onClick={() => setEditing(false)}>
+                    <Button type="button" size="sm" variant="outline" onClick={() => {
+                        setEditing(false);
+                        toast.warning('Category Update Cancelled');
+                    }}>
                         Cancel
                     </Button>
                 </form>
                 <form
-                    action={deleteCategory}
+                    action={async (formData)=> {
+                        await deleteCategory(formData);
+                        setEditing(false);
+                        toast.success('Category Deleted');
+                    }}
                     onSubmit={(e) => {
                         if (!confirm('Delete this category and all its spendings?')) e.preventDefault();
                     }}>

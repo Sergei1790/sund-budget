@@ -7,7 +7,7 @@ import InviteLink from "@/components/InviteLink";
 import {prisma} from '@/lib/prisma'
 import Image from 'next/image';
 import Link from 'next/link';
-
+import { Toaster } from "sonner";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -60,6 +60,7 @@ export default async function RootLayout({
             )}
           </div>
         </header>
+        <Toaster position="top-center" theme="dark" richColors/>
         {children}
       </body>
     </html>
