@@ -6,13 +6,18 @@ import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import DatePicker from '@/components/DatePicker';
+import {toast} from 'sonner';
+
 interface Props {
     categories: Category[];
 }
 
 export default function AddSpendingForm({categories}: Props) {
     return (
-        <form action={createSpending} className="space-y-4">
+        <form action={async (formData) => {
+                await createSpending(formData);
+                toast.success('Spending added');
+            }} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                     <Label htmlFor="amount">Amount</Label>
