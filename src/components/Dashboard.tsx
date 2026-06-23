@@ -9,6 +9,7 @@ import {startOfMonth, startOfWeek, isAfter} from 'date-fns';
 import SpendingChart from './SpendingChart';
 import Link from 'next/link';
 import {ScrollText} from 'lucide-react';
+import {aggregateByCategory} from '@/lib/aggregate';
 
 interface Props {
     household: Household & {
@@ -26,14 +27,7 @@ export default function Dashboard({household}: Props) {
     const monthSpendings = household.spendings.filter((s) => isAfter(s.date, monthStart));
     const monthTotal = monthSpendings.reduce((acc, s) => acc + s.amount.toNumber(), 0);
 
-    const totals = new Map<string, number>();
-
-    for (const s of monthSpendings) {
-        const current = totals.get(s.category.name) ?? 0;
-        totals.set(s.category.name, current + Number(s.amount));
-    }
-    const chartData = Array.from(totals, ([name, total]) => ({name, total}));
-
+    const chartData = aggregateByCategory(monthSpendings);
     return (
         <div className="max-w-4xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
             <header className="space-y-4">

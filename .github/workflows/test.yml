@@ -22,6 +22,9 @@ jobs:
       - run: npm run lint
 
       - run: npm run build
+
+      - run: npm test
+
         env:
           AUTH_SECRET: dummy-secret-for-build
           AUTH_GITHUB_ID: dummy

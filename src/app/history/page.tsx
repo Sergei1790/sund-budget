@@ -3,7 +3,7 @@ import {auth} from '@/auth';
 import {redirect} from 'next/navigation';
 import {format} from 'date-fns';
 import formatCurrency from '@/lib/format';
-import type {Category, Spending} from '@/generated/prisma/client';
+import {aggregateByMonth} from '@/lib/aggregate';
 export default async function History() {
     const session = await auth();
     if (!session?.user?.email) return null;
@@ -32,21 +32,10 @@ export default async function History() {
 
     const spendings = dbUser.households[0].household.spendings;
 
-    const byMonth = new Map<string, (Spending & {category: Category})[]>();
-
-    for (const s of spendings) {
-        const monthKey = format(s.date, 'yyyy-MM'); // "2026-06"
-        const current = byMonth.get(monthKey) ?? []; // this month's list, or empty
-        current.push(s); // add s to the list
-        byMonth.set(monthKey, current); // store the list back
-    }
-    const months = Array.from(byMonth, ([month, items]) => ({
-        month,
-        items,
-        total: items.reduce((acc, s) => acc + s.amount.toNumber(), 0),
-    }));
+    const months = aggregateByMonth(spendings);
+   
     const grandTotal = spendings.reduce((acc, s) => acc + s.amount.toNumber(), 0);
-
+    
     return (
         <main className="pt-4 sm:p-6 max-w-6xl mx-auto">
             <div className="flex items-center justify-between mb-4">
