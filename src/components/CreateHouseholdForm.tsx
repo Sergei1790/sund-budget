@@ -13,8 +13,12 @@ export default function CreateHouseholdForm() {
             <p className="text-muted-foreground mb-6">Start tracking spending with your partner.</p>
             <form 
                 action={async (formData) => {
-                    await createHousehold(formData);
-                    toast.success('Household created');
+                    try {
+                        await createHousehold(formData);
+                        toast.success('Household created');
+                    } catch {
+                        toast.error('Failed to create household');
+                    }
                 }}
                 className="space-y-3">
                 <div className="space-y-1.5">

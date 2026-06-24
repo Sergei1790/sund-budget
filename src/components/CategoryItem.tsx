@@ -18,9 +18,13 @@ export default function CategoryItem({category}: Props) {
             <div className="inline-flex items-center gap-2 bg-card border border-border rounded-full pl-3 pr-1 py-1">
                 <form
                     action={async (formData) => {
-                        await updateCategory(formData);
-                        toast.success('Category Updated');
-                        setEditing(false);
+                        try {
+                            await updateCategory(formData);
+                            toast.success('Category updated');
+                            setEditing(false);
+                        } catch {
+                            toast.error('Failed to update category');
+                        }
                     }}
                     className="inline-flex items-center gap-2">
                     <input type="hidden" name="categoryId" value={category.id} />
@@ -36,10 +40,14 @@ export default function CategoryItem({category}: Props) {
                     </Button>
                 </form>
                 <form
-                    action={async (formData)=> {
-                        await deleteCategory(formData);
-                        setEditing(false);
-                        toast.success('Category Deleted');
+                    action={async (formData) => {
+                        try {
+                            await deleteCategory(formData);
+                            toast.success('Category deleted');
+                            setEditing(false);
+                        } catch {
+                            toast.error('Failed to delete category');
+                        }
                     }}
                     onSubmit={(e) => {
                         if (!confirm('Delete this category and all its spendings?')) e.preventDefault();
