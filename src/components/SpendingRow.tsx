@@ -23,9 +23,13 @@ export default function SpendingRow({spending, categories}: Props) {
             <li className="py-4">
                 <form
                     action={async (formData) => {
-                        await updateSpending(formData);
-                        toast.success('Spending Updated');
-                        setEditing(false);
+                        try {
+                            await updateSpending(formData);
+                            toast.success('Spending updated');
+                            setEditing(false);
+                        } catch {
+                            toast.error('Failed to update spending');
+                        }
                     }}
                     className="space-y-4 rounded-lg border border-border bg-card/50 p-4">
                     <input type="hidden" name="spendingId" value={spending.id} />
@@ -90,8 +94,12 @@ export default function SpendingRow({spending, categories}: Props) {
 
                 <form
                     action={async (formData) => {
-                        await deleteSpending(formData);
-                        toast.success('Spending deleted');
+                        try {
+                            await deleteSpending(formData);
+                            toast.success('Spending deleted');
+                        } catch {
+                            toast.error('Failed to delete spending');
+                        }
                     }}>
                     <input type="hidden" name="spendingId" value={spending.id} />
                     <Button type="submit" variant="destructive" size="sm">

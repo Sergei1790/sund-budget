@@ -8,8 +8,12 @@ export default function AddCategoryForm() {
     return (
         <form 
             action={async (formData) => {
-                await createCategory(formData);
-                toast.success('Category Added');
+                try {
+                    await createCategory(formData);
+                    toast.success('Category added');
+                } catch {
+                    toast.error('Failed to add category');
+                }
             }} className="space-y-3">
             <div className="flex gap-2">
                 <Input id="name" name="name" placeholder="New category name" required />

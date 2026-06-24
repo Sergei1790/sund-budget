@@ -14,10 +14,16 @@ interface Props {
 
 export default function AddSpendingForm({categories}: Props) {
     return (
-        <form action={async (formData) => {
-                await createSpending(formData);
-                toast.success('Spending added');
-            }} className="space-y-4">
+        <form
+            action={async (formData) => {
+                try {
+                    await createSpending(formData);
+                    toast.success('Spending added');
+                } catch {
+                    toast.error('Failed to add spending');
+                }
+            }}
+            className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                     <Label htmlFor="amount">Amount</Label>
@@ -30,12 +36,7 @@ export default function AddSpendingForm({categories}: Props) {
             </div>
             <div className="space-y-1.5">
                 <Label htmlFor="categoryId">Category</Label>
-                <select
-                    id="categoryId"
-                    name="categoryId"
-                    required
-                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                >
+                <select id="categoryId" name="categoryId" required className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring">
                     {categories.map((cat) => (
                         <option value={cat.id} key={cat.id}>
                             {cat.name}
