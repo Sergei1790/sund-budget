@@ -25,7 +25,7 @@ export default function DatePicker({ name, defaultDate }: { name: string, defaul
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                    <Calendar mode="single" selected={date} onSelect={(d) => d && setDate(d)} />
+                    <Calendar mode="single" selected={date} weekStartsOn={1} onSelect={(d) => d && setDate(d)} />
                 </PopoverContent>
             </Popover>
             <Input id={name} name={name} type="hidden" value={date ? format(date, 'yyyy-MM-dd') : ''} />
