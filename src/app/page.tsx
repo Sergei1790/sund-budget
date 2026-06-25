@@ -1,34 +1,9 @@
 import CreateHouseholdForm from '@/components/CreateHouseholdForm';
 import Dashboard from '@/components/Dashboard';
-import {prisma} from '@/lib/prisma';
-import {auth} from '@/auth';
+import {getHousehold} from '@/lib/household';
 
 export default async function Home() {
-    const session = await auth();
-    if (!session?.user?.email) return null;
-
-    const dbUser = await prisma.user.findUnique({
-        where: {email: session.user.email},
-        include: {
-            households: {
-                include: {
-                    household: {
-                        include: {
-                            categories: true,
-                            spendings: {
-                                include: {category: true},
-                                orderBy: {date: 'desc'},
-                            },
-                        },
-                    },
-                },
-            },
-        },
-    });
-    if (!dbUser) {
-        return <p>User not found</p>;
-    }
-    const household = dbUser.households[0]?.household;
+    const household = await getHousehold();
 
     return (
         <main className="pt-4 sm:p-6">

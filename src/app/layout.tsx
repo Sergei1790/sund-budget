@@ -4,10 +4,10 @@ import "./globals.css";
 import { auth } from '@/auth';
 import { signOut } from '@/auth';
 import InviteLink from "@/components/InviteLink";
-import {prisma} from '@/lib/prisma'
 import Image from 'next/image';
 import Link from 'next/link';
 import { Toaster } from "sonner";
+import {getHousehold} from '@/lib/household';
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -29,13 +29,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
     const session = await auth();
-    const dbUser = session?.user?.email
-        ? await prisma.user.findUnique({
-            where: {email: session.user.email},
-            include: {households: {include: {household: true}}},
-          })
-        : null;
-    const household = dbUser?.households[0]?.household;
+    const household = await getHousehold();
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}>
       <body className="min-h-full flex flex-col">
