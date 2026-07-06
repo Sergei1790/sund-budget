@@ -18,6 +18,9 @@ export default async function SignInPage({searchParams}: {searchParams: Promise<
                     <form action={async () => { 'use server'; await signIn('github', {redirectTo: callbackUrl ?? '/'}); }}>
                         <Button type="submit" className="w-full">Sign in with GitHub</Button>
                     </form>
+                    <form action={async () => { 'use server'; await signIn('demo', { redirectTo: '/' }); }}>
+                        <Button type="submit" variant="secondary" className="w-full">Try the demo</Button>
+                    </form>
                 </CardContent>
             </Card>
         </main>
