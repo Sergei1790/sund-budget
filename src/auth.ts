@@ -1,28 +1,40 @@
-import NextAuth from "next-auth";
-import GitHub from "next-auth/providers/github";
-import Google from "next-auth/providers/google";
-import { prisma } from "@/lib/prisma";
+import NextAuth from 'next-auth';
+import GitHub from 'next-auth/providers/github';
+import Google from 'next-auth/providers/google';
+import {prisma} from '@/lib/prisma';
+import Credentials from 'next-auth/providers/credentials';
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [GitHub, Google],
-  callbacks: {
-    async signIn({ user }) {
-      if (!user.email) return false;
-      await prisma.user.upsert({
-        where: { email: user.email },
-        update: { name: user.name, image: user.image },
-        create: { email: user.email, name: user.name, image: user.image },
-      });
-      return true;
+export const {handlers, auth, signIn, signOut} = NextAuth({
+    providers: [
+        GitHub,
+        Google,
+        Credentials({
+            id: 'demo',
+            name: 'Demo',
+            credentials: {},
+            authorize: async () => {
+                return {email: 'demo@sund-budget.app', name: 'Demo User'};
+            },
+        }),
+    ],
+    callbacks: {
+        async signIn({user}) {
+            if (!user.email) return false;
+            await prisma.user.upsert({
+                where: {email: user.email},
+                update: {name: user.name, image: user.image},
+                create: {email: user.email, name: user.name, image: user.image},
+            });
+            return true;
+        },
+        async session({session}) {
+            if (session.user?.email) {
+                const dbUser = await prisma.user.findUnique({
+                    where: {email: session.user.email},
+                });
+                if (dbUser) session.user.id = dbUser.id;
+            }
+            return session;
+        },
     },
-    async session({ session }) {
-      if (session.user?.email) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: session.user.email },
-        });
-        if (dbUser) session.user.id = dbUser.id;
-      }
-      return session;
-    },
-  },
 });
