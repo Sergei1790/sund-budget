@@ -3,6 +3,7 @@
 A shared household budget tracker for couples - log spending, categorize it, and see where the money goes. Built for my wife and me; she uses it daily.
 
 **Live:** https://sund-budget.vercel.app
+No signup needed - click **Try the demo** on the sign-in page for a pre-filled household.
 
 
  ![Dashboard](docs/dashboard.png)
@@ -17,6 +18,7 @@ A shared household budget tracker for couples - log spending, categorize it, and
 - **Categories CRUD** - default categories seeded on household creation; inline rename; cascade delete
 - **Week & month totals** + a **spending-by-category donut chart** (Recharts)
 - **History view** - spending grouped by month with per-month and grand totals
+- **Demo mode** - one-click demo login with seeded data, auto-reset daily via Vercel cron
 - **Toast notifications** on every action (sonner)
 - **Responsive** - mobile-first; works on the phone she actually uses
 
@@ -41,6 +43,7 @@ A shared household budget tracker for couples - log spending, categorize it, and
 - **Pure aggregation functions** (`src/lib/aggregate.ts`) extracted out of components so the grouping/summing logic is unit-tested in isolation - no rendering, no DB mocks.
 - **Server/client boundary handling** - Prisma `Decimal` values are serialized to `number` before crossing into client components.
 - **Auth-aware middleware** preserves the intended destination through sign-in via `callbackUrl`, so invite links survive the login round-trip.
+- **Secret-protected demo reset** - `/api/reset-demo` verifies the `CRON_SECRET` Bearer header sent by Vercel cron (401 otherwise); the seed is idempotent (upsert the demo user, wipe and recreate its data).
 
 ## Running locally
 
@@ -57,6 +60,7 @@ AUTH_GITHUB_ID="..."
 AUTH_GITHUB_SECRET="..."
 AUTH_GOOGLE_ID="..."
 AUTH_GOOGLE_SECRET="..."
+CRON_SECRET="..."                       # protects /api/reset-demo
 ```
 
 OAuth callback (local): `http://localhost:3000/api/auth/callback/{github|google}`
