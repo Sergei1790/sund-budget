@@ -5,7 +5,7 @@ import SpendingRow from '@/components/SpendingRow';
 import CategoryItem from '@/components/CategoryItem';
 import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import formatCurrency from '@/lib/format';
-import {startOfMonth, startOfWeek, isAfter} from 'date-fns';
+import {startOfMonth, startOfWeek, isBefore} from 'date-fns';
 import SpendingChart from './SpendingChart';
 import Link from 'next/link';
 import {ScrollText} from 'lucide-react';
@@ -20,11 +20,11 @@ interface Props {
 
 export default function Dashboard({household}: Props) {
     const weekStart = startOfWeek(new Date(), {weekStartsOn: 1});
-    const weekSpendings = household.spendings.filter((s) => isAfter(s.date, weekStart));
+    const weekSpendings = household.spendings.filter((s) => !isBefore(s.date, weekStart));
     const weekTotal = weekSpendings.reduce((acc, s) => acc + s.amount.toNumber(), 0);
 
     const monthStart = startOfMonth(new Date());
-    const monthSpendings = household.spendings.filter((s) => isAfter(s.date, monthStart));
+    const monthSpendings = household.spendings.filter((s) => !isBefore(s.date, monthStart));
     const monthTotal = monthSpendings.reduce((acc, s) => acc + s.amount.toNumber(), 0);
 
     const chartData = aggregateByCategory(monthSpendings);
