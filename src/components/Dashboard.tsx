@@ -56,24 +56,6 @@ export default function Dashboard({household}: Props) {
                     <AddSpendingForm categories={household.categories} />
                 </CardContent>
             </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Recent spending</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {household.spendings.length === 0 ? (
-                        <p className="text-muted-foreground text-sm">No spending logged yet.</p>
-                    ) : (
-                        <ul className="divide-y divide-border">
-                            {household.spendings.map((spending) => (
-                                <SpendingRow key={spending.id} spending={{...spending, amount: spending.amount.toNumber()}} categories={household.categories} />
-                            ))}
-                        </ul>
-                    )}
-                </CardContent>
-            </Card>
-
             <Card>
                 <CardHeader>
                     <CardTitle>Spending by category (this month)</CardTitle>
@@ -93,6 +75,24 @@ export default function Dashboard({household}: Props) {
                     <AddCategoryForm />
                 </CardContent>
             </Card>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle>Recent spending</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {household.spendings.length === 0 ? (
+                        <p className="text-muted-foreground text-sm">No spending logged yet.</p>
+                    ) : (
+                        <ul className="divide-y divide-border">
+                            {household.spendings.map((spending) => (
+                                <SpendingRow key={spending.id} spending={{...spending, amount: spending.amount.toNumber()}} categories={household.categories} />
+                            ))}
+                        </ul>
+                    )}
+                </CardContent>
+            </Card>
+
         </div>
     );
 }

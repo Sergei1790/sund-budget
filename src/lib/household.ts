@@ -22,3 +22,18 @@ export const getHousehold = cache(async () => {
     });
     return dbUser?.households[0]?.household ?? null;
 });
+
+export async function requireHouseholdMember(){
+        const session = await auth();
+        if (!session?.user?.email) throw new Error('Not authenticated');
+
+        const user = await prisma.user.findUnique({
+            where: {email: session.user.email},
+            include: {households: true},
+        });
+
+        if (!user) throw new Error('Not authenticated');
+        if (!user.households[0]) throw new Error('No household membership exists');
+
+    return{userId:user.id, householdId:user.households[0].householdId}
+}

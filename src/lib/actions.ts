@@ -4,7 +4,7 @@ import {prisma} from '@/lib/prisma';
 import {auth} from '@/auth';
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
-
+import{requireHouseholdMember} from '@/lib/household';
 export async function createHousehold(formData: FormData) {
     const DEFAULT_CATEGORIES = ['Groceries', 'Household Supplies', 'Bills', 'Clothes', 'Presents', 'Entertainment', 'Other'];
     try {
@@ -53,18 +53,10 @@ export async function createCategory(formData: FormData) {
         const name = formData.get('name') as string;
         if (!name?.trim()) throw new Error('Name required');
 
-        const session = await auth();
-        if (!session?.user?.email) throw new Error('Not authenticated');
-
-        const user = await prisma.user.findUnique({
-            where: {email: session.user.email},
-            include: {households: true},
-        });
-        if (!user) throw new Error('Not authenticated');
-        if (!user.households[0]) throw new Error('No household membership exists');
+        const { householdId } = await requireHouseholdMember();
 
         await prisma.category.create({
-            data: {name, householdId: user.households[0].householdId},
+            data: {name, householdId},
         });
 
         revalidatePath('/');
