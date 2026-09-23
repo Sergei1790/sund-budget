@@ -73,21 +73,11 @@ export async function updateCategory(formData: FormData) {
         if (!name?.trim()) throw new Error('Name required');
         if (!categoryId || isNaN(categoryId)) throw new Error('Category required');
 
-        const session = await auth();
-        if (!session?.user?.email) throw new Error('Not authenticated');
-
-        const user = await prisma.user.findUnique({
-            where: {email: session.user.email},
-            include: {households: true},
-        });
-
-        if (!user) throw new Error('Not authenticated');
-
-        if (!user.households[0]) throw new Error('No household membership exists');
+        const { householdId } = await requireHouseholdMember();
 
         const category = await prisma.category.findUnique({where: {id: categoryId}});
         if (!category) throw new Error('No category');
-        if (category.householdId !== user.households[0].householdId) throw new Error('Category not in your household');
+        if (category.householdId !== householdId) throw new Error('Category not in your household');
 
         await prisma.category.update({
             where: {id: categoryId},
@@ -105,21 +95,12 @@ export async function deleteCategory(formData: FormData) {
         const categoryId = Number(formData.get('categoryId'));
         if (!categoryId || isNaN(categoryId)) throw new Error('No id sent');
 
-        const session = await auth();
-        if (!session?.user?.email) throw new Error('Not authenticated');
-
-        const user = await prisma.user.findUnique({
-            where: {email: session.user.email},
-            include: {households: true},
-        });
-
-        if (!user) throw new Error('Not authenticated');
-        if (!user.households[0]) throw new Error('No household membership exists');
+        const { householdId } = await requireHouseholdMember();
 
         const category = await prisma.category.findUnique({where: {id: categoryId}});
         if (!category) throw new Error('No category');
 
-        if (category.householdId !== user.households[0].householdId) throw new Error('Category not in your household');
+        if (category.householdId !== householdId) throw new Error('Category not in your household');
 
         await prisma.category.delete({where: {id: categoryId}});
 
@@ -142,32 +123,15 @@ export async function createSpending(formData: FormData) {
         if (isNaN(date.getTime())) throw new Error('Date required');
         if (!categoryId || isNaN(categoryId)) throw new Error('Category required');
 
-        const session = await auth();
-        if (!session?.user?.email) throw new Error('Not authenticated');
+        const { householdId } = await requireHouseholdMember();
+           
 
-        const user = await prisma.user.findUnique({
-            where: {email: session.user.email},
-            include: {
-                households: {
-                    include: {
-                        household: {
-                            include: {
-                                categories: true,
-                            },
-                        },
-                    },
-                },
-            },
-        });
-        if (!user) throw new Error('Not authenticated');
-
-        if (!user.households[0]) throw new Error('No household membership exists');
-
-        const householdCategories = user.households[0].household.categories;
-        if (!householdCategories.some((c) => c.id === categoryId)) throw new Error('Category not in your household');
+        const category = await prisma.category.findUnique({where: {id: categoryId}});
+        if (!category) throw new Error('No category');
+        if (category.householdId !== householdId) throw new Error('Category not in your household');
 
         await prisma.spending.create({
-            data: {amount, description, date, categoryId, householdId: user.households[0].householdId},
+            data: {amount, description, date, categoryId, householdId},
         });
 
         revalidatePath('/');
@@ -191,25 +155,15 @@ export async function updateSpending(formData: FormData) {
         if (isNaN(date.getTime())) throw new Error('Date required');
         if (!categoryId || isNaN(categoryId)) throw new Error('Category required');
 
-        const session = await auth();
-        if (!session?.user?.email) throw new Error('Not authenticated');
-
-        const user = await prisma.user.findUnique({
-            where: {email: session.user.email},
-            include: {households: true},
-        });
-
-        if (!user) throw new Error('Not authenticated');
-
-        if (!user.households[0]) throw new Error('No household membership exists');
+        const { householdId } = await requireHouseholdMember();
 
         const category = await prisma.category.findUnique({where: {id: categoryId}});
         if (!category) throw new Error('No category');
-        if (category.householdId !== user.households[0].householdId) throw new Error('Category not in your household');
+        if (category.householdId !== householdId) throw new Error('Category not in your household');
 
         const spending = await prisma.spending.findUnique({where: {id: spendingId}});
         if (!spending) throw new Error('No spending');
-        if (spending.householdId !== user.households[0].householdId) throw new Error('Spending not in your household');
+        if (spending.householdId !== householdId) throw new Error('Spending not in your household');
 
         await prisma.spending.update({
             where: {id: spendingId},
@@ -232,21 +186,12 @@ export async function deleteSpending(formData: FormData) {
         const spendingId = Number(formData.get('spendingId'));
         if (!spendingId || isNaN(spendingId)) throw new Error('No id sent');
 
-        const session = await auth();
-        if (!session?.user?.email) throw new Error('Not authenticated');
-
-        const user = await prisma.user.findUnique({
-            where: {email: session.user.email},
-            include: {households: true},
-        });
-
-        if (!user) throw new Error('Not authenticated');
-        if (!user.households[0]) throw new Error('No household membership exists');
+        const { householdId } = await requireHouseholdMember();
 
         const spending = await prisma.spending.findUnique({where: {id: spendingId}});
         if (!spending) throw new Error('No spending');
 
-        if (spending.householdId !== user.households[0].householdId) throw new Error('Spending not in your household');
+        if (spending.householdId !== householdId) throw new Error('Spending not in your household');
 
         await prisma.spending.delete({where: {id: spendingId}});
 

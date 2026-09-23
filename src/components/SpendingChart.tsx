@@ -2,20 +2,9 @@
 import {Pie, PieChart, Tooltip, ResponsiveContainer, Legend} from 'recharts';
 import formatCurrency from '@/lib/format';
 
-const COLORS = [
-    'var(--chart-1)',
-    'var(--chart-2)',
-    'var(--chart-3)',
-    'var(--chart-4)',
-    'var(--chart-5)',
-    'var(--chart-6)',
-    'var(--chart-7)',
-    'var(--chart-8)',
-    'var(--chart-9)',
-    'var(--chart-10)',
-];
+const COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)', 'var(--chart-9)', 'var(--chart-10)'];
 
-export default function SpendingChart({data}: {data: {name: string; total: number}[]}) {
+export default function SpendingChart({data, onSelectCategory}: {data: {name: string; total: number}[]; onSelectCategory: (name: string, color: string) => void}) {
     const coloredData = data.map((d, i) => ({...d, fill: COLORS[i % COLORS.length]}));
 
     return (
@@ -33,6 +22,9 @@ export default function SpendingChart({data}: {data: {name: string; total: numbe
                     cornerRadius={6}
                     stroke="transparent"
                     label={({value}) => formatCurrency(value)}
+                    onClick={(entry) => {
+                        if (entry.name) onSelectCategory(entry.name, entry.fill ?? '');
+                    }}
                 />
                 <Tooltip
                     contentStyle={{
@@ -42,7 +34,11 @@ export default function SpendingChart({data}: {data: {name: string; total: numbe
                         color: 'var(--foreground)',
                     }}
                 />
-                <Legend />
+                <Legend
+                    onClick={(entry) => {
+                        if (entry.value) onSelectCategory(String(entry.value), entry.color ?? '');
+                    }}
+                />
             </PieChart>
         </ResponsiveContainer>
     );
