@@ -35,5 +35,5 @@ export async function requireHouseholdMember(){
         if (!user) throw new Error('Not authenticated');
         if (!user.households[0]) throw new Error('No household membership exists');
 
-    return{userId:user.id, householdId:user.households[0].householdId}
+    return{householdId:user.households[0].householdId}
 }

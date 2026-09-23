@@ -6,7 +6,7 @@ import CategoryItem from '@/components/CategoryItem';
 import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import formatCurrency from '@/lib/format';
 import {startOfMonth, startOfWeek, isBefore} from 'date-fns';
-import SpendingChart from './SpendingChart';
+import SpendingByCategory from './SpendingByCategory';
 import Link from 'next/link';
 import {ScrollText} from 'lucide-react';
 import {aggregateByCategory} from '@/lib/aggregate';
@@ -60,7 +60,14 @@ export default function Dashboard({household}: Props) {
                 <CardHeader>
                     <CardTitle>Spending by category (this month)</CardTitle>
                 </CardHeader>
-                <CardContent>{chartData.length > 0 ? <SpendingChart data={chartData} /> : <p>No data yet</p>}</CardContent>
+                <CardContent>
+                    {chartData.length > 0 ? (
+                        <SpendingByCategory
+                            chartData={chartData}
+                            spendings={household.spendings.map((s) => ({...s, amount: s.amount.toNumber()}))}
+                        />
+                    ) : <p>No data yet</p>}
+                </CardContent>
             </Card>
             <Card>
                 <CardHeader>
