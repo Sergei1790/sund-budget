@@ -27,17 +27,19 @@ export async function createHousehold(formData: FormData) {
         if (user.households.length > 0) {
             throw new Error('You are already in a household');
         } else {
-            const newHousehold = await prisma.household.create({
-                data: {name},
-            });
-            await prisma.householdMember.create({
-                data: {householdId: newHousehold.id, userId: user.id},
-            });
-            await prisma.category.createMany({
-                data: DEFAULT_CATEGORIES.map((cat) => ({
-                    name: cat,
-                    householdId: newHousehold.id,
-                })),
+            await prisma.$transaction(async (tx)=>{
+                const newHousehold = await tx.household.create({
+                    data: {name},
+                });
+                await tx.householdMember.create({
+                    data: {householdId: newHousehold.id, userId: user.id},
+                });
+                await tx.category.createMany({
+                    data: DEFAULT_CATEGORIES.map((cat) => ({
+                        name: cat,
+                        householdId: newHousehold.id,
+                    })),
+                });
             });
         }
 
