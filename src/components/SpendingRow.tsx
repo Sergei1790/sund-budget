@@ -24,9 +24,14 @@ export default function SpendingRow({spending, categories}: Props) {
                 <form
                     action={async (formData) => {
                         try {
-                            await updateSpending(formData);
-                            toast.success('Spending updated');
-                            setEditing(false);
+                            const result = await updateSpending(formData);
+                            if(result?.error){
+                                toast.error(result.error)
+                            } else{
+                                toast.success('Spending updated');
+                                setEditing(false);
+                            }
+                            
                         } catch {
                             toast.error('Failed to update spending');
                         }
