@@ -17,8 +17,13 @@ export default function AddSpendingForm({categories}: Props) {
         <form
             action={async (formData) => {
                 try {
-                    await createSpending(formData);
-                    toast.success('Spending added');
+                    const result = await createSpending(formData);
+                    if(result?.error){
+                        toast.error(result.error)
+                    } else{
+                        toast.success('Spending added');
+                    }
+
                 } catch {
                     toast.error('Failed to add spending');
                 }

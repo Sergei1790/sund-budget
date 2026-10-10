@@ -4,7 +4,9 @@ import {prisma} from '@/lib/prisma';
 import {auth} from '@/auth';
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
-import{requireHouseholdMember} from '@/lib/household';
+import {requireHouseholdMember} from '@/lib/household';
+import {createSpendingValidation, updateSpendingValidation} from '@/lib/validations';
+
 export async function createHousehold(formData: FormData) {
     const DEFAULT_CATEGORIES = ['Groceries', 'Household Supplies', 'Bills', 'Clothes', 'Presents', 'Entertainment', 'Other'];
     try {
@@ -115,20 +117,21 @@ export async function deleteCategory(formData: FormData) {
 
 export async function createSpending(formData: FormData) {
     try {
-        const amount = formData.get('amount') as string;
-        const description = formData.get('description') as string;
-        const rawDate = formData.get('date') as string;
-        const date = new Date(rawDate);
-        const categoryId = Number(formData.get('categoryId'));
-
-        if (!amount?.trim()) throw new Error('Amount required');
-        if (isNaN(date.getTime())) throw new Error('Date required');
-        if (!categoryId || isNaN(categoryId)) throw new Error('Category required');
+        const data = {
+            amount : formData.get('amount'),
+            description : formData.get('description'),
+            date : formData.get('date'),
+            categoryId : formData.get('categoryId')
+        };
+        const result = createSpendingValidation.safeParse(data)
+        if(!result.success){
+            return { error: result.error.issues[0].message  } 
+        }
+        const { amount, description, date, categoryId } = result.data;
 
         const { householdId } = await requireHouseholdMember();
            
-
-        const category = await prisma.category.findUnique({where: {id: categoryId}});
+        const category = await prisma.category.findUnique({where: {id:categoryId}});
         if (!category) throw new Error('No category');
         if (category.householdId !== householdId) throw new Error('Category not in your household');
 
@@ -145,17 +148,20 @@ export async function createSpending(formData: FormData) {
 
 export async function updateSpending(formData: FormData) {
     try {
-        const spendingId = Number(formData.get('spendingId'));
-        const amount = formData.get('amount') as string;
-        const description = formData.get('description') as string;
-        const rawDate = formData.get('date') as string;
-        const date = new Date(rawDate);
-        const categoryId = Number(formData.get('categoryId'));
+        const data = {
+            amount : formData.get('amount'),
+            description : formData.get('description'),
+            date : formData.get('date'),
+            categoryId : formData.get('categoryId'),
+            spendingId : formData.get('spendingId')
+        }
+        
+        const result = updateSpendingValidation.safeParse(data);
+        if(!result.success){
+            return { error: result.error.issues[0].message  } 
+        }
+        const {amount, description, date, categoryId, spendingId} = result.data
 
-        if (!spendingId || isNaN(spendingId)) throw new Error('No id sent');
-        if (!amount?.trim()) throw new Error('Amount required');
-        if (isNaN(date.getTime())) throw new Error('Date required');
-        if (!categoryId || isNaN(categoryId)) throw new Error('Category required');
 
         const { householdId } = await requireHouseholdMember();
 
